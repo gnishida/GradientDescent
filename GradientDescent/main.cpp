@@ -1,7 +1,7 @@
 #include <vector>
 #include "GradientDescent.h"
 
-#define NUM_TASKS 10
+#define NUM_TASKS 20
 
 float dot(std::vector<float> w, std::vector<float> f) {
 	float ret = 0.0f;
@@ -30,13 +30,13 @@ float randf() {
 int main() {
 	std::vector<float> w(8);
 	w[0] = 0.1;
-	w[1] = 0.1;
-	w[2] = 0.2;
-	w[3] = 0.0;
-	w[4] = 0.3;
-	w[5] = 0.1;
-	w[6] = 0.0;
-	w[7] = 0.2;
+	w[1] = 0.05;
+	w[2] = 0.15;
+	w[3] = 0.02;
+	w[4] = 0.37;
+	w[5] = 0.01;
+	w[6] = 0.05;
+	w[7] = 0.25;
 
 	std::vector<std::pair<std::vector<float>, std::vector<float> > > features;
 	std::vector<int> choices;
@@ -50,7 +50,10 @@ int main() {
 		}
 		features.push_back(std::make_pair(feature1, feature2));
 
-		if (randf() < 1.0f / (1.0f + exp(dot(w, feature2) - dot(w, feature1)))) {
+		float d1 = dot(w, feature1);
+		float d2 = dot(w, feature2);
+
+		if (d1 > d2) {
 			choices.push_back(1);
 		} else {
 			choices.push_back(0);
@@ -58,7 +61,7 @@ int main() {
 	}
 
 	GradientDescent gd;
-	std::vector<float> estimate_w = gd.run(features, choices, 10000, 0.0, 0.001, 0.001);
+	std::vector<float> estimate_w = gd.run(features, choices, 10000, false, 0.0, 0.001, 0.001);
 
 	normalize(estimate_w);
 
@@ -70,7 +73,8 @@ int main() {
 	int correct = 0;
 	int incorrect = 0;
 	for (int d = 0; d < NUM_TASKS; ++d) {
-		int h = dot(estimate_w, features[d].first) - dot(estimate_w, features[d].second) ? 1 : 0;
+		int y = dot(w, features[d].first) > dot(w, features[d].second) ? 1 : 0;
+		int h = dot(estimate_w, features[d].first) > dot(estimate_w, features[d].second) ? 1 : 0;
 		if (h == choices[d]) {
 			printf("%d: OK\n", d);
 			correct++;
